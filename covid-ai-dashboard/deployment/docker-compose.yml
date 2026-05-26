@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../datasets:/app/datasets
+    environment:
+      - PORT=8000
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+
+  streamlit:
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../datasets:/app/datasets
