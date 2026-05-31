@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 
-// Dynamically import Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false, loading: () => <div className="h-64 flex items-center justify-center text-gray-400">Loading Chart...</div> });
 
 export default function Dashboard() {
@@ -16,7 +15,6 @@ export default function Dashboard() {
   const [endDate, setEndDate] = useState('2023-03-09');
   const [loading, setLoading] = useState(true);
 
-  // Fetch Available Countries and Dates on mount
   useEffect(() => {
     const fetchInit = async () => {
       try {
@@ -36,7 +34,6 @@ export default function Dashboard() {
     fetchInit();
   }, []);
 
-  // Fetch Dashboard Data whenever filters change
   useEffect(() => {
     const fetchDashboard = async () => {
       setLoading(true);
@@ -66,9 +63,6 @@ export default function Dashboard() {
     }
   };
 
-  // --- PLOTLY CHART CONFIGS ---
-  
-  // 1. Line Chart
   const lineTraces = data?.trends ? Object.keys(data.trends).map(country => ({
     x: data.trends[country].dates,
     y: data.trends[country].cases,
@@ -76,7 +70,6 @@ export default function Dashboard() {
     name: country
   })) : [];
 
-  // 2. Bar Chart
   const barTrace = data?.top_affected ? [{
     x: data.top_affected.countries,
     y: data.top_affected.cases,
@@ -84,7 +77,6 @@ export default function Dashboard() {
     marker: { color: '#3b82f6' }
   }] : [];
 
-  // 3. Map
   const mapTrace = data?.map ? [{
     type: 'choropleth',
     locationmode: 'country names',
@@ -94,7 +86,6 @@ export default function Dashboard() {
     autocolorscale: false
   }] : [];
 
-  // 4. Pie Chart
   const pieTrace = data?.kpi ? [{
     values: [data.kpi.total_cases, data.kpi.total_deaths],
     labels: ['Total Cases', 'Total Deaths'],
@@ -102,7 +93,6 @@ export default function Dashboard() {
     marker: { colors: ['#3b82f6', '#ef4444'] }
   }] : [];
 
-  // 5. Scatter Plot
   const scatterTrace = data?.scatter ? [{
     x: data.scatter.cases,
     y: data.scatter.deaths,
@@ -112,7 +102,6 @@ export default function Dashboard() {
     marker: { size: 12, color: '#8b5cf6', opacity: 0.7 }
   }] : [];
 
-  // 6. Heatmap
   const heatmapTrace = data?.heatmap ? [{
     z: data.heatmap.z,
     x: data.heatmap.x,
@@ -121,7 +110,6 @@ export default function Dashboard() {
     colorscale: 'RdBu'
   }] : [];
 
-  // 7. Prediction
   const predData = data?.prediction;
   const predTraces = predData ? [
     {
@@ -140,7 +128,6 @@ export default function Dashboard() {
     }
   ] : [];
 
-  // Common Layout for Clean Theme (Use a function to prevent Plotly from mutating shared nested objects!)
   const getCommonLayout = () => ({
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
@@ -153,7 +140,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 px-8 py-4 shadow-sm flex items-center justify-between sticky top-0 z-50">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
@@ -165,7 +151,6 @@ export default function Dashboard() {
       </header>
 
       <div className="flex">
-        {/* Sidebar Controls */}
         <aside className="w-80 bg-white border-r border-gray-200 p-6 h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto hidden md:block">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Filters & Controls</h2>
           
@@ -194,10 +179,7 @@ export default function Dashboard() {
           </div>
         </aside>
 
-        {/* Main Dashboard Canvas */}
         <main className="flex-1 p-8">
-          
-          {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <h3 className="text-sm font-semibold text-gray-500 uppercase">Filtered Total Cases</h3>
@@ -219,7 +201,6 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
-              {/* Chart Grid Row 1 */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Daily Cases Trend</h3>
@@ -236,7 +217,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Chart Grid Row 2 */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Global Spread (Map)</h3>
@@ -253,7 +233,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Chart Grid Row 3 */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Cases vs Deaths</h3>
@@ -284,7 +263,6 @@ export default function Dashboard() {
               </div>
             </>
           )}
-
         </main>
       </div>
     </div>

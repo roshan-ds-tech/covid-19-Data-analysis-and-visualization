@@ -62,7 +62,6 @@ def get_dashboard_data(req: DashboardRequest):
     if df is None:
         raise HTTPException(status_code=503, detail="Data not loaded")
 
-    # 1. Filter Data
     filtered = df[(df['Date'] >= req.start_date) & (df['Date'] <= req.end_date)]
     if req.countries:
         filtered = filtered[filtered['Country/Region'].isin(req.countries)]
@@ -73,15 +72,12 @@ def get_dashboard_data(req: DashboardRequest):
     latest_date = filtered['Date'].max()
     latest_filtered = filtered[filtered['Date'] == latest_date]
 
-    # Global mapping (for choropleth map, usually shows all countries at the latest date)
     global_latest = df[df['Date'] == df['Date'].max()]
     map_data = global_latest.groupby('Country/Region', as_index=False)[['Confirmed', 'Deaths']].sum()
 
-    # KPIs
     f_total_cases = int(latest_filtered['Confirmed'].sum())
     f_total_deaths = int(latest_filtered['Deaths'].sum())
 
-    # Daily Trend (Line Chart)
     daily_trend = filtered.groupby(['Date', 'Country/Region'])['Daily_Confirmed'].sum().reset_index()
     trend_data = {}
     for country in daily_trend['Country/Region'].unique():
@@ -91,14 +87,11 @@ def get_dashboard_data(req: DashboardRequest):
             "cases": country_df['Daily_Confirmed'].tolist()
         }
 
-    # Top Affected (Bar Chart)
     top_affected = latest_filtered.groupby('Country/Region')['Confirmed'].sum().reset_index().sort_values('Confirmed', ascending=False)
     
-    # Heatmap (Correlation)
     country_pivot = daily_trend.pivot(index='Date', columns='Country/Region', values='Daily_Confirmed').fillna(0)
     corr_matrix = country_pivot.corr()
     
-    # ML Prediction (for the first selected country)
     prediction = None
     if req.countries and len(req.countries) > 0:
         target_country = req.countries[0]
